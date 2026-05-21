@@ -1,13 +1,15 @@
-# camunda7 — Claude Code plugin for executable Camunda 7 BPMN
+# claude-camunda-skill — Claude Code plugin for executable Camunda 7 BPMN
 
-A [Claude Code](https://code.claude.com/docs) plugin that lets Claude **assemble,
-fix, and review executable Camunda Platform 7** processes (`.bpmn`) — the kind
-that actually deploy and run on the engine, with `camunda:` execution details.
+A [Claude Code](https://code.claude.com/docs) plugin (named **`camunda7`**) that
+lets Claude **assemble, fix, and review executable Camunda Platform 7** processes
+(`.bpmn`) — the kind that actually deploy and run on the engine, with `camunda:`
+execution details.
 
-It is the Camunda-7 companion to the generic [`bpmn`](../claude-bpmn-plugin)
-plugin. Where `bpmn` draws engine-agnostic diagrams, `camunda7` works the third
-layer that makes a process *run*: the `camunda:` extensions (delegate /
-external-task / DMN wiring, forms, async, `historyTimeToLive`).
+The `camunda7` plugin is the Camunda 7 companion to the generic, engine-agnostic
+`bpmn` plugin: where `bpmn` draws the diagram, `camunda7` works the third layer
+that makes a process *run* — the `camunda:` extensions (delegate / external-task /
+DMN wiring, forms, async, `historyTimeToLive`). A future Camunda 8 plugin would
+live here as a sibling.
 
 ## The core idea: assemble, don't generate
 
