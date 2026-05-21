@@ -1,0 +1,210 @@
+{
+  "skill_name": "camunda7",
+  "evals": [
+    {
+      "id": 0,
+      "name": "text-to-executable-loan",
+      "prompt": "Собери исполняемый процесс согласования заявки на кредит для Camunda 7 и сохрани в loan.bpmn. Логика: заявка подана → считаем кредитный скоринг → если скоринг < 500, заявка отклоняется автоматически; иначе кредитный аналитик (группа credit-analysts) рассматривает и одобряет/отклоняет; при одобрении деньги выдаются; при любом отказе заявителя уведомляют. Собирай из НАШИХ существующих активити — каталог в файле loan-catalog.json. Если какой-то активити нет в каталоге — НЕ пиши её реализацию: поставь заглушку (имя + входы/выходы) и опиши её в спеке на доработку.",
+      "expected_output": "loan.bpmn assembled from the catalog: creditScoring and disburseFunds wired via camunda:delegateExpression; the rejection-notification step (absent from catalog) is a marked deployable stub with an inputOutput contract; a follow-up activities spec (markdown) lists it; NO java/worker code generated; exclusive gateway with default + credit-analysts user task + distinct ends; passes validate + lint.",
+      "files": ["evals/files/loan-catalog.json"],
+      "assertions": [
+        "loan.bpmn is valid Camunda 7 (camunda namespace, isExecutable=\"true\") with camunda:historyTimeToLive set",
+        "Existing activities are wired EXACTLY from the catalog: credit scoring via camunda:delegateExpression=\"${creditScoring}\" and disbursement via camunda:delegateExpression=\"${disburseFunds}\" (reused, not reinvented or turned into external tasks)",
+        "The rejection-notification step (not in the catalog) is a marked STUB (camunda:property stub=true and/or STUB documentation) with a camunda:inputOutput contract, and is deployable",
+        "No activity implementation code was generated — outputs contain only the .bpmn and the spec (no .java/.js/.ts/.py worker or delegate files)",
+        "A follow-up implementation spec (a markdown file) exists and lists the stubbed activity with its inputs/outputs",
+        "Exclusive gateway on the score has a default flow; a user task is assigned to candidate group 'credit-analysts'; there are distinct end events for the rejected vs disbursed outcomes",
+        "The loan-review user task is wired to a form from the catalog (camunda:formRef=\"loanReviewForm\")",
+        "Passes the skill's validate and lint with no ERROR/WARN (stub INFO is fine); camunda: + JUEL, no zeebe:",
+        "Follows the catalog conventions and variable dictionary: historyTimeToLive=\"P90D\" and failedJobRetryTimeCycle \"R5/PT10M\" from the catalog, and process variables use catalog names (applicantId, creditScore, approved)"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "bpmn-to-executable-external",
+      "prompt": "Вот обычный BPMN процесса возмещения расходов (expense.bpmn), без привязки к движку. Сделай его исполняемым в Camunda 7, собрав сервисные шаги из наших существующих активити — каталог в expense-catalog.json. Задачу 'Manager approval' назначь на группу managers. Если какой-то активити в каталоге нет — поставь заглушку (имя + входы/выходы) и вынеси в спеку на доработку, реализацию НЕ пиши. Сохрани результат.",
+      "expected_output": "expense.bpmn made executable: Check policy wired to the existing external activity (topic check-policy); Reimburse (absent from catalog) is a marked deployable stub with an inputOutput contract; a follow-up spec lists it; NO code generated; Manager approval -> candidateGroups managers; historyTimeToLive + isExecutable; passes validate + lint.",
+      "files": ["evals/files/expense.bpmn", "evals/files/expense-catalog.json"],
+      "assertions": [
+        "Result is valid Camunda 7 and preserves the original structure (start, Check policy, Manager approval, the Approved? gateway, Reimburse, both end events)",
+        "'Check policy' is wired to the existing catalog activity: camunda:type=\"external\" camunda:topic=\"check-policy\" with a camunda:inputOutput contract",
+        "'Reimburse employee' (not in the catalog) is a marked STUB with a camunda:inputOutput contract, and is deployable",
+        "No activity implementation code was generated (no .java/.js/.ts/.py files in outputs — only the .bpmn and the spec)",
+        "A follow-up implementation spec (markdown) exists listing the Reimburse stub with its inputs/outputs",
+        "'Manager approval' is assigned to candidateGroups=\"managers\"; the process has camunda:historyTimeToLive and isExecutable=\"true\"",
+        "The 'Manager approval' user task has a form; since the catalog has no matching form it is a marked form-stub (camunda:property name=\"formStub\") and is recorded in the spec",
+        "Passes the skill's validate and lint with no ERROR/WARN; no zeebe: attributes",
+        "Follows the catalog conventions: historyTimeToLive=\"P90D\" and external service-task style, and variables use catalog names (expenseId, policyOk)"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "extend-error-and-escalation",
+      "prompt": "В процессе invoice.bpmn (Camunda 7) добавь обработку ошибок и эскалацию: 1) если 'Charge customer' выбрасывает бизнес-ошибку PAYMENT_FAILED — уведомить клиента и завершить отдельным концом 'Payment failed'; 2) на 'Approve invoice' повесь некритичный (не прерывающий) таймер: если за 2 дня не согласовано — уведомить руководителя. Шаги уведомления собирай из существующих активити (каталог invoice-catalog.json); если активити нет — заглушка + спека на доработку, код не пиши. Перелейаудь и убедись, что всё валидно.",
+      "expected_output": "invoice.bpmn extended: boundary error (PAYMENT_FAILED) -> customer notification wired to existing notify-customer activity -> 'Payment failed' end; non-interrupting boundary timer (P2D) on Approve -> manager notification as a marked STUB (absent from catalog) + spec; existing camunda preserved; NO code generated; passes validate + lint.",
+      "files": ["evals/files/invoice.bpmn", "evals/files/invoice-catalog.json"],
+      "assertions": [
+        "A boundary error event on 'Charge customer' references a root <bpmn:error> with errorCode PAYMENT_FAILED, leading to a customer-notification step and a new 'Payment failed' end event",
+        "The customer-notification step is wired to the existing catalog activity (camunda:type=external, topic notify-customer), not reinvented",
+        "A non-interrupting (cancelActivity=\"false\") boundary timer with an ISO-8601 duration (P2D/PT48H) on 'Approve invoice' leads to a manager-notification step that is a marked STUB with an inputOutput contract (manager notification is not in the catalog)",
+        "No activity implementation code was generated, and a follow-up spec lists the manager-notification stub",
+        "The pre-existing camunda implementation is preserved: delegateExpression=\"${chargeCustomer}\" + asyncBefore on Charge, candidateGroups=\"finance\" on Approve, and camunda:historyTimeToLive on the process",
+        "The 'Approve invoice' user task is given a form wired from the catalog (camunda:formRef=\"invoiceApprovalForm\")",
+        "Passes the skill's validate and lint with no ERROR/WARN; remains valid Camunda 7 (camunda, no zeebe)",
+        "Uses catalog declarations and names: the PAYMENT_FAILED error and the invoiceId variable come from the catalog"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "validate-and-fix-order",
+      "prompt": "Наш процесс order-process.bpmn не деплоится в Camunda 7, и до этого работал странно (что-то выполнялось по два раза). Разберись, почини и коротко объясни, что было не так. Сервисным шагам, которым не хватает реализации, привязывай НАШИ существующие активити из order-catalog.json (не выдумывай новые); если чего-то в каталоге нет — заглушка + спека.",
+      "expected_output": "order-process.bpmn fixed: XOR join after the parallel split -> parallel gateway (stops double execution); Reserve stock wired to existing delegate reserveStock; Charge card external gets topic charge-card from the catalog; timer '2 days' -> ISO; historyTimeToLive added; passes validate + lint; plain-language explanation of each problem.",
+      "files": ["evals/files/order-process.bpmn", "evals/files/order-catalog.json"],
+      "assertions": [
+        "Token duplication is fixed: the exclusive (XOR) join after the parallel split is changed to a parallel gateway",
+        "The under-specified tasks are wired to existing catalog activities (Reserve stock -> camunda:delegateExpression=\"${reserveStock}\"; Charge card external -> camunda:topic=\"charge-card\"), not invented from scratch",
+        "The invalid timer '2 days' is replaced with an ISO-8601 value (e.g. P2D / PT48H)",
+        "camunda:historyTimeToLive is added to the process",
+        "After the fix the file passes the skill's validate and lint with no ERROR/WARN and remains valid Camunda 7",
+        "Gives a clear plain-language explanation of each problem found (token duplication, missing/under-specified activity wiring, the bad timer, and the missing historyTimeToLive)",
+        "Applies the catalog conventions: historyTimeToLive=\"P90D\" and failedJobRetryTimeCycle \"R5/PT10M\""
+      ]
+    },
+    {
+      "id": 4,
+      "name": "prompt-context-extends-catalog",
+      "prompt": "Собери процесс уведомления о заказе для Camunda 7 и сохрани в notify.bpmn: проверить заказ → отправить SMS клиенту → дождаться подтверждения оплаты → завершить. Каталог проекта — в notify-catalog.json. Дополнительно (этого НЕТ в каталоге, но в проекте есть — используй это, не выдумывай): активити отправки SMS — external task, topic send-sms, вход phone, выход smsId; переменная customerPhone (String); ожидание оплаты — по сообщению PaymentConfirmed.",
+      "expected_output": "notify.bpmn assembled using BOTH sources: validateOrder wired from the catalog; the SMS step USED from the prompt context (external topic send-sms, not stubbed); a root <bpmn:message name=PaymentConfirmed> + message catch event from the prompt; prompt variables (customerPhone, smsId) used; conventions (P90D) applied; passes validate+lint; follow-up flags that send-sms/customerPhone/PaymentConfirmed came from the prompt and suggests adding them to the catalog.",
+      "files": ["evals/files/notify-catalog.json"],
+      "assertions": [
+        "notify.bpmn is valid Camunda 7 (camunda namespace, isExecutable=\"true\") with camunda:historyTimeToLive=\"P90D\" from the catalog",
+        "The catalog activity is wired: order validation via camunda:delegateExpression=\"${validateOrder}\"",
+        "The SMS step, described only in the prompt (not in the catalog), is USED not stubbed: a service task with camunda:type=\"external\" and camunda:topic=\"send-sms\"",
+        "The payment wait, described only in the prompt, is modeled with a root <bpmn:message> named PaymentConfirmed referenced by a message catch event / receive task",
+        "Prompt-provided variables are used (customerPhone and smsId) in camunda:inputOutput / events",
+        "Passes the skill's validate and lint with no ERROR/WARN",
+        "The follow-up (or transcript) flags that send-sms / customerPhone / PaymentConfirmed came from the prompt rather than the catalog, and suggests adding them to the catalog"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "assemble-dmn",
+      "prompt": "Собери процесс оценки риска для Camunda 7 и сохрани в risk.bpmn: заявка получена → проверить заявку → оценить риск нашим DMN-решением → если риск HIGH, ручная проверка (группа risk-team), иначе авто-одобрение → конец. Каталог проекта — в dmn-catalog.json. DMN-решение уже существует (см. decisions) — ПОДКЛЮЧИ его, не пиши таблицу. Чего нет в каталоге — заглушка + спека.",
+      "expected_output": "risk.bpmn: validateApplication wired via delegate; a BusinessRuleTask wired to the existing DMN (camunda:decisionRef=\"riskDecision\" + resultVariable riskLevel, mapDecisionResult); exclusive gateway on riskLevel with default; manual-review user task to candidateGroups risk-team with the riskReviewForm; NO DMN table authored; passes validate+lint; P90D.",
+      "files": ["evals/files/dmn-catalog.json"],
+      "assertions": [
+        "risk.bpmn is valid Camunda 7 (camunda namespace, isExecutable=\"true\") with camunda:historyTimeToLive=\"P90D\"",
+        "A BusinessRuleTask is wired to the existing DMN: camunda:decisionRef=\"riskDecision\" with a resultVariable (riskLevel) and mapDecisionResult — the decision is REUSED, not re-authored",
+        "validateApplication is wired from the catalog via camunda:delegateExpression=\"${validateApplication}\"",
+        "An exclusive gateway branches on riskLevel with a default flow; the manual-review user task is assigned to candidateGroups risk-team and given the catalog form camunda:formRef=\"riskReviewForm\"",
+        "No DMN decision table and no activity implementation code were generated (assembler wires the existing decision)",
+        "Passes the skill's validate and lint with no ERROR/WARN; no zeebe:"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "multi-instance-fulfilment",
+      "prompt": "Собери процесс выполнения заказа для Camunda 7 и сохрани в fulfilment.bpmn: заказ получен → для КАЖДОЙ позиции заказа зарезервировать склад → подтвердить заказ → конец. Резерв и подтверждение собирай из каталога mi-catalog.json. «Для каждой позиции» — это multi-instance по коллекции lineItems с элементной переменной item.",
+      "expected_output": "fulfilment.bpmn: reserveStock wired via delegate inside a multi-instance activity (camunda:collection=\"lineItems\" + camunda:elementVariable=\"item\"); confirmOrder wired via delegate; passes validate+lint; P90D.",
+      "files": ["evals/files/mi-catalog.json"],
+      "assertions": [
+        "fulfilment.bpmn is valid Camunda 7 with camunda:historyTimeToLive=\"P90D\"",
+        "The reserve-stock step is a multi-instance activity with multiInstanceLoopCharacteristics and camunda:collection=\"lineItems\" plus camunda:elementVariable=\"item\"",
+        "reserveStock and confirmOrder are wired from the catalog via camunda:delegateExpression (reused, not reinvented)",
+        "Passes the skill's validate and lint with no ERROR/WARN; no zeebe:"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "collaboration-two-pools",
+      "prompt": "Собери коллаборацию для Camunda 7 и сохрани в collab.bpmn: два пула — Customer и Order System. Customer размещает заказ (сообщение OrderPlaced) → система обрабатывает заказ → отправляет подтверждение (сообщение OrderConfirmed) клиенту. Шаги системной стороны и сообщения — из каталога collab-catalog.json. Customer — это участник-«чёрный ящик».",
+      "expected_output": "collab.bpmn: a collaboration with two participants (Customer, Order System), message flows for OrderPlaced and OrderConfirmed crossing the pools, processOrder/sendConfirmation wired via delegate; root <bpmn:message> for OrderPlaced/OrderConfirmed; passes validate+lint.",
+      "files": ["evals/files/collab-catalog.json"],
+      "assertions": [
+        "collab.bpmn is a valid Camunda 7 collaboration with at least two participants (pools) and at least one message flow crossing them",
+        "processOrder is wired from the catalog via camunda:delegateExpression on the system side",
+        "The catalog messages OrderPlaced and OrderConfirmed are present (declared and/or used)",
+        "Passes the skill's validate and lint with no ERROR/WARN; no zeebe:"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "lanes-and-roles",
+      "prompt": "Собери процесс согласования предложения для Camunda 7 и сохрани в quote.bpmn: сгенерировать предложение → продавец проверяет (Sales) → если есть скидка, финансы одобряют (Finance) → конец. Используй каталог lanes-catalog.json: роли sales и finance — это дорожки, размести задачи пользователей по соответствующим дорожкам и группам.",
+      "expected_output": "quote.bpmn: a laned process with Sales and Finance lanes; the review user task in Sales (candidateGroups sales, quoteReviewForm), the approval user task in Finance (candidateGroups finance, discountApprovalForm); generateQuote wired via delegate; passes validate+lint with no unassigned nodes.",
+      "files": ["evals/files/lanes-catalog.json"],
+      "assertions": [
+        "quote.bpmn is valid Camunda 7 with camunda:historyTimeToLive=\"P90D\" and a laneSet with at least two lanes (Sales, Finance)",
+        "The user tasks carry candidateGroups for sales and finance and are wired to the catalog forms (quoteReviewForm / discountApprovalForm)",
+        "generateQuote is wired from the catalog via camunda:delegateExpression",
+        "Passes validate and lint with no ERROR/WARN (every node is in a lane); no zeebe:"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "infer-conventions-no-catalog",
+      "prompt": "В процессе infer-base.bpmn (Camunda 7) добавь финальный шаг «Archive order» ПОСЛЕ ревью, перед концом. Это Java-делегат ${archiveOrder}. Каталога нет — выведи проектные конвенции из самого процесса (historyTimeToLive, стиль сервис-задач, ретраи, async) и применяй их к новому шагу. Перелейаудь и проверь.",
+      "expected_output": "infer-base.bpmn extended: an Archive order delegate (${archiveOrder}) inserted before the end, matching the inferred conventions (asyncBefore, failedJobRetryTimeCycle R3/PT5M, delegate style); historyTimeToLive P120D preserved; the follow-up states which conventions were inferred and from where; passes validate+lint.",
+      "files": ["evals/files/infer-base.bpmn"],
+      "assertions": [
+        "The Archive order step is wired as camunda:delegateExpression=\"${archiveOrder}\" and inserted before the end event",
+        "Inferred conventions are applied to the new step: camunda:asyncBefore and camunda:failedJobRetryTimeCycle \"R3/PT5M\", matching the existing process",
+        "The process's camunda:historyTimeToLive=\"P120D\" is preserved (inferred, not reset to a default)",
+        "The follow-up states the conventions were inferred from the existing process (not asked / not defaulted)",
+        "Passes validate and lint with no ERROR/WARN; remains valid Camunda 7"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "flexible-catalog-yaml",
+      "prompt": "Собери процесс уведомления о заказе для Camunda 7 и сохрани в notify.bpmn: проверить заказ → уведомить клиента → конец. Каталог проекта — в notify-catalog.yaml (формат YAML). Собирай шаги из каталога.",
+      "expected_output": "notify.bpmn assembled from the YAML catalog exactly as from JSON: validateOrder and notifyCustomer wired via delegate; conventions (P90D, retries, async) applied; passes validate+lint — proving the catalog parser is format-agnostic.",
+      "files": ["evals/files/notify-catalog.yaml"],
+      "assertions": [
+        "notify.bpmn is valid Camunda 7 with camunda:historyTimeToLive=\"P90D\" taken from the YAML catalog",
+        "validateOrder and notifyCustomer are both wired from the YAML catalog via camunda:delegateExpression",
+        "Passes the skill's validate and lint with no ERROR/WARN; no zeebe:"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "explain-readonly",
+      "prompt": "Объясни, как исполняется процесс invoice.bpmn (Camunda 7): пройди по шагам и расскажи, как каждый шаг работает на движке (делегаты/топики/async/формы/гейтвеи) и где узкие места. Ничего НЕ меняй — это объяснение, не правка.",
+      "expected_output": "A plain-language, step-by-step explanation of how invoice.bpmn runs on the engine: each step's implementation (delegateExpression chargeCustomer, asyncBefore, candidateGroups finance), the gateway logic, and runtime risks. The file is NOT modified.",
+      "files": ["evals/files/invoice.bpmn"],
+      "assertions": [
+        "The explanation describes each step's runtime implementation (e.g. the charge delegate, asyncBefore, the approval user task's candidateGroups)",
+        "It flags at least one runtime risk or watch-out (wait state, retries, error handling)",
+        "It is read-only: invoice.bpmn is not modified (no rewritten .bpmn produced as output)"
+      ]
+    },
+    {
+      "id": 13,
+      "name": "scale-order-to-cash",
+      "prompt": "Собери реалистичный процесс order-to-cash для Camunda 7 и сохрани в o2c.bpmn: заказ получен → проверить заказ → (если нужна ручная проверка — задача группе ops) → зарезервировать склад → списать карту → выбрать перевозчика нашим DMN → отгрузить → отправить инвойс → конец. Обработай ошибку списания (CHARGE_FAILED). Всё собирай из каталога o2c-catalog.json; чего нет — заглушка + спека, код не пиши.",
+      "expected_output": "o2c.bpmn: a ~15-node order-to-cash assembled from the catalog — validateOrder/reserveStock/shipOrder delegates, charge-card/send-invoice external topics, shippingDecision DMN, an ops manual-review user task with a form, a CHARGE_FAILED boundary error, P90D; passes validate+lint; doubles as a layout stress test.",
+      "files": ["evals/files/o2c-catalog.json"],
+      "assertions": [
+        "o2c.bpmn is valid Camunda 7 with camunda:historyTimeToLive=\"P90D\" and at least 12 flow nodes",
+        "Catalog steps are wired exactly: validateOrder/reserveStock/shipOrder via delegateExpression, charge-card and send-invoice via external topics, and a BusinessRuleTask via camunda:decisionRef=\"shippingDecision\"",
+        "The ops manual-review user task has a form (formRef) or a marked form-stub; a CHARGE_FAILED business error is handled",
+        "Every user task has a form or a marked form-stub",
+        "Passes the skill's validate and lint with no ERROR/WARN; no zeebe:; lays out without overlaps"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "prompt-catalog-conflict",
+      "prompt": "Собери процесс оплаты для Camunda 7 и сохрани в pay.bpmn: получить заказ → списать деньги → завершить. Каталог проекта — в charge-catalog.json. Важно: у нас 'списать деньги' — это Java-делегат ${chargeCardBean} (НЕ external task), и переменная amount у нас типа String, а не Long.",
+      "expected_output": "pay.bpmn where the prompt CONFLICTS with the catalog (catalog: charge = external topic charge-card, amount Long; prompt: charge = delegate ${chargeCardBean}, amount String). The skill must NOT silently merge or emit both: it picks one consistent implementation, surfaces the conflict explicitly in the follow-up (both values named), states which it used and why (catalog as source of truth, or an explicit prompt override), and asks the user to confirm. Passes validate+lint.",
+      "files": ["evals/files/charge-catalog.json"],
+      "assertions": [
+        "pay.bpmn is valid Camunda 7 with camunda:historyTimeToLive=\"P90D\" from the catalog",
+        "The charge step has exactly ONE consistent implementation — NOT both an external topic charge-card AND a delegate ${chargeCardBean}",
+        "The prompt-vs-catalog conflict is surfaced explicitly in the follow-up/transcript (it names both: the catalog's external topic charge-card vs the prompt's delegate ${chargeCardBean}, and/or the amount type Long vs String)",
+        "The conflict is resolved deliberately, not silently: the run states which value it used and why (catalog as source of truth, or a deliberate prompt override) and asks the user to confirm",
+        "Passes the skill's validate and lint with no ERROR/WARN; remains valid Camunda 7"
+      ]
+    }
+  ]
+}

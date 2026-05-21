@@ -1,0 +1,32 @@
+{
+  "_comment": "Catalog for the quote-to-approval process. User-task steps belong to the roles below; put each in its lane.",
+  "conventions": {
+    "serviceTaskStyle": "delegate",
+    "formType": "camundaForms",
+    "expressionLanguage": "juel",
+    "historyTimeToLive": "P90D"
+  },
+  "activities": [
+    { "ref": "generateQuote", "type": "delegate", "name": "Generate quote",
+      "inputs": [{ "name": "leadId", "type": "String" }],
+      "outputs": [{ "name": "quoteId", "type": "String" }],
+      "description": "Builds a quote document from a lead." }
+  ],
+  "forms": [
+    { "ref": "quoteReviewForm", "name": "Quote review",
+      "fields": [{ "key": "ok", "label": "Looks good?", "type": "checkbox" }],
+      "description": "Sales reviews the generated quote." },
+    { "ref": "discountApprovalForm", "name": "Discount approval",
+      "fields": [{ "key": "approved", "label": "Approve discount?", "type": "checkbox" }],
+      "description": "Finance approves any discount." }
+  ],
+  "variables": [
+    { "name": "leadId", "type": "String", "description": "Lead identifier." },
+    { "name": "quoteId", "type": "String", "description": "Generated quote id." },
+    { "name": "approved", "type": "Boolean", "description": "Finance decision." }
+  ],
+  "roles": [
+    { "ref": "sales", "type": "group", "description": "Sales reps who review quotes." },
+    { "ref": "finance", "type": "group", "description": "Finance approvers for discounts." }
+  ]
+}

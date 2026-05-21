@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Defs_order" targetNamespace="http://bpmn.io/schema/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI"><bpmn:process id="orderProcess" name="Order Process" isExecutable="true"><bpmn:startEvent id="S" name="Order placed"><bpmn:outgoing>f1</bpmn:outgoing></bpmn:startEvent><bpmn:parallelGateway id="Split" name=""><bpmn:incoming>f1</bpmn:incoming><bpmn:outgoing>f2</bpmn:outgoing><bpmn:outgoing>f3</bpmn:outgoing></bpmn:parallelGateway><bpmn:serviceTask id="Reserve" name="Reserve stock"><bpmn:incoming>f2</bpmn:incoming><bpmn:outgoing>f4</bpmn:outgoing></bpmn:serviceTask><bpmn:serviceTask id="Charge" name="Charge card" camunda:type="external"><bpmn:incoming>f3</bpmn:incoming><bpmn:outgoing>f5</bpmn:outgoing></bpmn:serviceTask><bpmn:exclusiveGateway id="Join" name=""><bpmn:incoming>f4</bpmn:incoming><bpmn:incoming>f5</bpmn:incoming><bpmn:outgoing>f6</bpmn:outgoing></bpmn:exclusiveGateway><bpmn:intermediateCatchEvent id="Wait" name="Wait for warehouse"><bpmn:incoming>f6</bpmn:incoming><bpmn:outgoing>f7</bpmn:outgoing><bpmn:timerEventDefinition><bpmn:timeDuration>2 days</bpmn:timeDuration></bpmn:timerEventDefinition></bpmn:intermediateCatchEvent><bpmn:serviceTask id="Ship" name="Ship order" camunda:class="org.acme.ShipDelegate"><bpmn:incoming>f7</bpmn:incoming><bpmn:outgoing>f8</bpmn:outgoing></bpmn:serviceTask><bpmn:endEvent id="E" name="Order shipped"><bpmn:incoming>f8</bpmn:incoming></bpmn:endEvent><bpmn:sequenceFlow id="f1" sourceRef="S" targetRef="Split" /><bpmn:sequenceFlow id="f2" sourceRef="Split" targetRef="Reserve" /><bpmn:sequenceFlow id="f3" sourceRef="Split" targetRef="Charge" /><bpmn:sequenceFlow id="f4" sourceRef="Reserve" targetRef="Join" /><bpmn:sequenceFlow id="f5" sourceRef="Charge" targetRef="Join" /><bpmn:sequenceFlow id="f6" sourceRef="Join" targetRef="Wait" /><bpmn:sequenceFlow id="f7" sourceRef="Wait" targetRef="Ship" /><bpmn:sequenceFlow id="f8" sourceRef="Ship" targetRef="E" /></bpmn:process><bpmndi:BPMNDiagram id="BPMNDiagram_orderProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_orderProcess" bpmnElement="orderProcess">
+      <bpmndi:BPMNShape id="S_di" bpmnElement="S">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Split_di" bpmnElement="Split">
+        <dc:Bounds x="200" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Reserve_di" bpmnElement="Reserve">
+        <dc:Bounds x="325" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Join_di" bpmnElement="Join" isMarkerVisible="true">
+        <dc:Bounds x="500" y="45" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Wait_di" bpmnElement="Wait">
+        <dc:Bounds x="657" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Ship_di" bpmnElement="Ship">
+        <dc:Bounds x="775" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="E_di" bpmnElement="E">
+        <dc:Bounds x="957" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Charge_di" bpmnElement="Charge">
+        <dc:Bounds x="325" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="f1_di" bpmnElement="f1">
+        <di:waypoint x="93" y="70" />
+        <di:waypoint x="200" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f2_di" bpmnElement="f2">
+        <di:waypoint x="250" y="70" />
+        <di:waypoint x="325" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f3_di" bpmnElement="f3">
+        <di:waypoint x="225" y="95" />
+        <di:waypoint x="225" y="210" />
+        <di:waypoint x="325" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f4_di" bpmnElement="f4">
+        <di:waypoint x="425" y="70" />
+        <di:waypoint x="500" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f6_di" bpmnElement="f6">
+        <di:waypoint x="550" y="70" />
+        <di:waypoint x="657" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f7_di" bpmnElement="f7">
+        <di:waypoint x="693" y="70" />
+        <di:waypoint x="775" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f8_di" bpmnElement="f8">
+        <di:waypoint x="875" y="70" />
+        <di:waypoint x="957" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f5_di" bpmnElement="f5">
+        <di:waypoint x="425" y="210" />
+        <di:waypoint x="525" y="210" />
+        <di:waypoint x="525" y="95" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

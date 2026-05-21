@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Executable Camunda 7 process skeleton showing the cases this skill produces:
+     an EXISTING activity wired from the catalog (DoWork -> delegateExpression);
+     a user task with a form wired from the catalog (Review -> formRef) — every
+     user task gets assignment + a form; and a STUB for an activity that doesn't
+     exist yet (NewStep -> external topic + camunda:inputOutput + stub marker;
+     also add it to <process>-activities-spec.md). Semantics + execution only;
+     run `camunda-tool.mjs layout` to generate the diagram. -->
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="myProcess" name="My Process" isExecutable="true"
+                camunda:historyTimeToLive="P180D">
+    <bpmn:startEvent id="Start" name="Started">
+      <bpmn:outgoing>f1</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <!-- EXISTING activity from the catalog: wired by its delegate bean name -->
+    <bpmn:serviceTask id="DoWork" name="Do work"
+                      camunda:delegateExpression="${doWork}"
+                      camunda:asyncBefore="true">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="orderId">${orderId}</camunda:inputParameter>
+          <camunda:outputParameter name="result">${result}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- USER TASK: assignment + a form wired from the catalog (every user task
+         gets a form; if none in the catalog, form-stub it with a spec entry) -->
+    <bpmn:userTask id="Review" name="Review"
+                   camunda:candidateGroups="reviewers"
+                   camunda:formRef="reviewForm" camunda:formRefBinding="latest">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f3</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- STUB: no existing activity fits, so a deployable placeholder + spec entry -->
+    <bpmn:serviceTask id="NewStep" name="New step"
+                      camunda:type="external" camunda:topic="new-step">
+      <bpmn:documentation>STUB — to implement (see activities spec). In: result. Out: newStepDone.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <camunda:properties><camunda:property name="stub" value="true" /></camunda:properties>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="result">${result}</camunda:inputParameter>
+          <camunda:outputParameter name="newStepDone">${newStepDone}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f4</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="End" name="Done">
+      <bpmn:incoming>f4</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="DoWork" />
+    <bpmn:sequenceFlow id="f2" sourceRef="DoWork" targetRef="Review" />
+    <bpmn:sequenceFlow id="f3" sourceRef="Review" targetRef="NewStep" />
+    <bpmn:sequenceFlow id="f4" sourceRef="NewStep" targetRef="End" />
+  </bpmn:process>
+</bpmn:definitions>

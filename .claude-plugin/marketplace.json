@@ -1,0 +1,17 @@
+{
+  "name": "camunda-tools",
+  "owner": {
+    "name": "Artur Karapetyan"
+  },
+  "metadata": {
+    "description": "Camunda Platform 7 tooling for Claude Code: build, wire, validate, and fix EXECUTABLE .bpmn processes (camunda: extensions, DMN, forms, async)."
+  },
+  "plugins": [
+    {
+      "name": "camunda7",
+      "source": "./",
+      "description": "Build, fix, and review executable Camunda 7 BPMN: delegates/external tasks/DMN/forms, extension-preserving non-destructive layout (collaborations, lanes, data), structural + engine-execution linting, diff/find.",
+      "version": "1.2.0"
+    }
+  ]
+}

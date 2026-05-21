@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Camunda 7 DMN 1.3 decision table. Referenced from a business rule task via
+     camunda:decisionRef="myDecision". Rule cells are FEEL. Needs its own HTTL.
+     Ships WITH a minimal DMNDI block so it renders in Camunda Modeler (a DMN with
+     no DMNDI opens blank). The camunda-tool does not lay out .dmn files. -->
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:camunda="http://camunda.org/schema/1.0/dmn"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+             xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/"
+             id="defs_myDecision" name="myDecision"
+             namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="myDecision" name="My Decision" camunda:historyTimeToLive="P180D">
+    <decisionTable id="dt" hitPolicy="UNIQUE">
+      <input id="in1" label="Amount">
+        <inputExpression id="ie1" typeRef="number"><text>amount</text></inputExpression>
+      </input>
+      <output id="out1" label="Result" name="result" typeRef="string" />
+      <rule id="r1">
+        <inputEntry id="r1i"><text>&lt; 1000</text></inputEntry>
+        <outputEntry id="r1o"><text>"low"</text></outputEntry>
+      </rule>
+      <rule id="r2">
+        <inputEntry id="r2i"><text>&gt;= 1000</text></inputEntry>
+        <outputEntry id="r2o"><text>"high"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="myDecision">
+        <dc:Bounds height="80" width="180" x="160" y="100" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

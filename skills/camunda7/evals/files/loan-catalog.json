@@ -1,0 +1,40 @@
+{
+  "_comment": "Project catalog for the loan process. Reuse these exact names; follow conventions.",
+  "conventions": {
+    "serviceTaskStyle": "delegate",
+    "formType": "camundaForms",
+    "expressionLanguage": "juel",
+    "historyTimeToLive": "P90D",
+    "failedJobRetryTimeCycle": "R5/PT10M",
+    "asyncDefault": "asyncBefore on delegate tasks that call external systems"
+  },
+  "activities": [
+    { "ref": "creditScoring", "type": "delegate", "name": "Compute credit score",
+      "inputs": [{ "name": "applicantId", "type": "String" }],
+      "outputs": [{ "name": "creditScore", "type": "Integer" }],
+      "description": "Calls the credit bureau and returns a 0-1000 score." },
+    { "ref": "disburseFunds", "type": "delegate", "name": "Disburse funds",
+      "inputs": [{ "name": "applicantId", "type": "String" }, { "name": "amount", "type": "Long" }],
+      "outputs": [{ "name": "disbursementId", "type": "String" }],
+      "description": "Transfers the approved loan amount to the applicant." }
+  ],
+  "forms": [
+    { "ref": "loanReviewForm", "name": "Loan review",
+      "fields": [
+        { "key": "approved", "label": "Approve loan?", "type": "checkbox" },
+        { "key": "comment", "label": "Comment", "type": "textarea" }
+      ],
+      "description": "Analyst decision form for the loan review user task." }
+  ],
+  "variables": [
+    { "name": "applicantId",     "type": "String",  "description": "Applicant identifier." },
+    { "name": "creditScore",     "type": "Integer", "description": "0-1000 bureau score." },
+    { "name": "approved",        "type": "Boolean", "description": "Analyst decision." },
+    { "name": "amount",          "type": "Long",    "description": "Requested loan amount." },
+    { "name": "rejectionReason", "type": "String",  "description": "Why the loan was rejected." },
+    { "name": "disbursementId",  "type": "String",  "description": "Id of the disbursement." }
+  ],
+  "roles": [
+    { "ref": "credit-analysts", "type": "group", "description": "Loan analysts who review applications." }
+  ]
+}

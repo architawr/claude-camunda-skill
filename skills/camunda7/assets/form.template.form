@@ -1,0 +1,34 @@
+{
+  "type": "default",
+  "id": "myForm",
+  "schemaVersion": 16,
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.23.0",
+  "components": [
+    {
+      "key": "approved",
+      "label": "I approve",
+      "type": "checkbox"
+    },
+    {
+      "key": "comment",
+      "label": "Comment",
+      "type": "textarea"
+    },
+    {
+      "key": "amount",
+      "label": "Amount",
+      "type": "number",
+      "validate": { "min": 0 }
+    },
+    {
+      "key": "department",
+      "label": "Department",
+      "type": "select",
+      "values": [
+        { "label": "Sales", "value": "sales" },
+        { "label": "Engineering", "value": "engineering" }
+      ]
+    }
+  ]
+}

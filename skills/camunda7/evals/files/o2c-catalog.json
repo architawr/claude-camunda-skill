@@ -1,0 +1,57 @@
+{
+  "_comment": "Rich catalog for a realistic order-to-cash process (scale test). Reuse these exact names; follow conventions.",
+  "conventions": {
+    "serviceTaskStyle": "mixed: delegate for internal beans, external task for integrations",
+    "formType": "camundaForms",
+    "expressionLanguage": "juel",
+    "historyTimeToLive": "P90D",
+    "failedJobRetryTimeCycle": "R5/PT10M",
+    "asyncDefault": "asyncBefore on delegate/external tasks that call external systems"
+  },
+  "activities": [
+    { "ref": "validateOrder", "type": "delegate", "name": "Validate order",
+      "inputs": [{ "name": "orderId", "type": "String" }], "outputs": [{ "name": "valid", "type": "Boolean" }],
+      "description": "Validates the incoming order." },
+    { "ref": "reserveStock", "type": "delegate", "name": "Reserve stock",
+      "inputs": [{ "name": "orderId", "type": "String" }], "outputs": [{ "name": "reserved", "type": "Boolean" }],
+      "description": "Reserves inventory for the order." },
+    { "ref": "charge-card", "type": "external", "topic": "charge-card", "name": "Charge card",
+      "inputs": [{ "name": "orderId", "type": "String" }, { "name": "amount", "type": "Long" }], "outputs": [{ "name": "chargeId", "type": "String" }],
+      "description": "External worker that charges the customer's card." },
+    { "ref": "shipOrder", "type": "delegate", "name": "Ship order",
+      "inputs": [{ "name": "orderId", "type": "String" }], "outputs": [{ "name": "shipmentId", "type": "String" }],
+      "description": "Hands the order to the carrier." },
+    { "ref": "send-invoice", "type": "external", "topic": "send-invoice", "name": "Send invoice",
+      "inputs": [{ "name": "orderId", "type": "String" }], "outputs": [],
+      "description": "External worker that emails the invoice." }
+  ],
+  "decisions": [
+    { "ref": "shippingDecision", "type": "dmn", "name": "Choose carrier", "hitPolicy": "UNIQUE",
+      "resultVariable": "carrier", "mapDecisionResult": "singleEntry",
+      "inputs": [{ "name": "orderId", "type": "String" }], "output": { "name": "carrier", "type": "String" },
+      "description": "Existing DMN that picks a carrier by destination/weight." }
+  ],
+  "forms": [
+    { "ref": "manualReviewForm", "name": "Manual review",
+      "fields": [{ "key": "approved", "label": "Approve order?", "type": "checkbox" }],
+      "description": "Used when an order needs a human check." }
+  ],
+  "messages": [
+    { "ref": "PaymentReceived", "description": "Async confirmation that payment cleared." }
+  ],
+  "errors": [
+    { "ref": "CHARGE_FAILED", "code": "CHARGE_FAILED", "description": "Card charge was declined." }
+  ],
+  "variables": [
+    { "name": "orderId", "type": "String", "description": "Order identifier." },
+    { "name": "amount", "type": "Long", "description": "Order total." },
+    { "name": "valid", "type": "Boolean", "description": "Order validity." },
+    { "name": "reserved", "type": "Boolean", "description": "Stock reserved." },
+    { "name": "chargeId", "type": "String", "description": "Charge id." },
+    { "name": "carrier", "type": "String", "description": "Chosen carrier." },
+    { "name": "approved", "type": "Boolean", "description": "Manual review outcome." }
+  ],
+  "roles": [
+    { "ref": "ops", "type": "group", "description": "Operations team for manual review." }
+  ]
+}

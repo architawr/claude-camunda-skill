@@ -1,0 +1,37 @@
+{
+  "_comment": "Project catalog for the risk-assessment process. Reuse these exact names; the DMN decision already exists — wire it, don't author the table.",
+  "conventions": {
+    "serviceTaskStyle": "delegate",
+    "formType": "camundaForms",
+    "expressionLanguage": "juel",
+    "historyTimeToLive": "P90D",
+    "failedJobRetryTimeCycle": "R5/PT10M"
+  },
+  "activities": [
+    { "ref": "validateApplication", "type": "delegate", "name": "Validate application",
+      "inputs": [{ "name": "applicationId", "type": "String" }],
+      "outputs": [{ "name": "valid", "type": "Boolean" }],
+      "description": "Checks the application is complete." }
+  ],
+  "decisions": [
+    { "ref": "riskDecision", "type": "dmn", "name": "Assess risk", "hitPolicy": "UNIQUE",
+      "resultVariable": "riskLevel", "mapDecisionResult": "singleEntry",
+      "inputs": [{ "name": "creditScore", "type": "Integer" }, { "name": "amount", "type": "Long" }],
+      "output": { "name": "riskLevel", "type": "String" },
+      "description": "Existing DMN decision table that returns LOW/HIGH for an application." }
+  ],
+  "forms": [
+    { "ref": "riskReviewForm", "name": "Risk review",
+      "fields": [{ "key": "decision", "label": "Approve?", "type": "checkbox" }],
+      "description": "Manual review form for high-risk applications." }
+  ],
+  "variables": [
+    { "name": "applicationId", "type": "String", "description": "Application identifier." },
+    { "name": "creditScore", "type": "Integer", "description": "Bureau score." },
+    { "name": "amount", "type": "Long", "description": "Requested amount." },
+    { "name": "riskLevel", "type": "String", "description": "LOW or HIGH from the DMN." }
+  ],
+  "roles": [
+    { "ref": "risk-team", "type": "group", "description": "Reviewers for high-risk applications." }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "_comment": "Catalog for the pay process. The prompt CONFLICTS with this: the catalog says charge is an external task on topic charge-card and amount is Long; the prompt says charge is a delegate ${chargeCardBean} and amount is String. The skill must surface the conflict, not silently merge.",
+  "conventions": {
+    "serviceTaskStyle": "external",
+    "expressionLanguage": "juel",
+    "historyTimeToLive": "P90D",
+    "failedJobRetryTimeCycle": "R5/PT10M"
+  },
+  "activities": [
+    { "ref": "charge-card", "type": "external", "name": "Charge card",
+      "inputs": [{ "name": "orderId", "type": "String" }, { "name": "amount", "type": "Long" }],
+      "outputs": [{ "name": "chargeId", "type": "String" }],
+      "description": "External worker that charges the customer's card." }
+  ],
+  "variables": [
+    { "name": "orderId",  "type": "String", "description": "Order id." },
+    { "name": "amount",   "type": "Long",   "description": "Amount to charge." },
+    { "name": "chargeId", "type": "String", "description": "Id of the charge." }
+  ]
+}

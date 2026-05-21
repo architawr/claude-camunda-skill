@@ -1,0 +1,25 @@
+{
+  "_comment": "Catalog for the order-fulfilment process. Reuse these names.",
+  "conventions": {
+    "serviceTaskStyle": "delegate",
+    "expressionLanguage": "juel",
+    "historyTimeToLive": "P90D",
+    "failedJobRetryTimeCycle": "R5/PT10M",
+    "asyncDefault": "asyncBefore on delegate tasks that call external systems"
+  },
+  "activities": [
+    { "ref": "reserveStock", "type": "delegate", "name": "Reserve stock",
+      "inputs": [{ "name": "item", "type": "Object" }],
+      "outputs": [{ "name": "reserved", "type": "Boolean" }],
+      "description": "Reserves stock for a single line item." },
+    { "ref": "confirmOrder", "type": "delegate", "name": "Confirm order",
+      "inputs": [{ "name": "orderId", "type": "String" }],
+      "outputs": [{ "name": "confirmed", "type": "Boolean" }],
+      "description": "Confirms the whole order once every item is reserved." }
+  ],
+  "variables": [
+    { "name": "orderId", "type": "String", "description": "Order identifier." },
+    { "name": "lineItems", "type": "Object", "description": "Collection of line items to iterate over." },
+    { "name": "item", "type": "Object", "description": "The current line item (element variable)." }
+  ]
+}

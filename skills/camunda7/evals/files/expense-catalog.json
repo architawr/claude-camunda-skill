@@ -1,0 +1,27 @@
+{
+  "_comment": "Project catalog for the expense process. NOTE: there is NO 'reimburse' activity and NO approval form — both must be stubbed.",
+  "conventions": {
+    "serviceTaskStyle": "external",
+    "formType": "camundaForms",
+    "expressionLanguage": "juel",
+    "historyTimeToLive": "P90D",
+    "failedJobRetryTimeCycle": "R5/PT10M",
+    "asyncDefault": "asyncBefore on external tasks"
+  },
+  "activities": [
+    { "ref": "check-policy", "type": "external", "name": "Check expense policy",
+      "inputs": [{ "name": "expenseId", "type": "String" }],
+      "outputs": [{ "name": "policyOk", "type": "Boolean" }],
+      "description": "External worker that validates the expense against company policy." }
+  ],
+  "forms": [],
+  "variables": [
+    { "name": "expenseId",       "type": "String",  "description": "Expense report id." },
+    { "name": "policyOk",        "type": "Boolean", "description": "Whether the expense passes policy." },
+    { "name": "approved",        "type": "Boolean", "description": "Manager decision." },
+    { "name": "reimbursementId", "type": "String",  "description": "Id of the reimbursement." }
+  ],
+  "roles": [
+    { "ref": "managers", "type": "group", "description": "Approving managers." }
+  ]
+}

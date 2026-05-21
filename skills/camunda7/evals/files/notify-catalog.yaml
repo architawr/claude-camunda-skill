@@ -1,0 +1,30 @@
+# Project catalog (YAML form) for the order-notification process.
+# Same shape as the JSON catalogs — the skill should read it just as well.
+conventions:
+  serviceTaskStyle: delegate
+  formType: camundaForms
+  expressionLanguage: juel
+  historyTimeToLive: P90D
+  failedJobRetryTimeCycle: R5/PT10M
+  asyncDefault: asyncBefore on delegate tasks that call external systems
+
+activities:
+  - ref: validateOrder
+    type: delegate
+    name: Validate order
+    inputs:
+      - { name: orderId, type: String }
+    outputs:
+      - { name: valid, type: Boolean }
+    description: Validates the order before notifying.
+  - ref: notifyCustomer
+    type: delegate
+    name: Notify customer
+    inputs:
+      - { name: orderId, type: String }
+    outputs: []
+    description: Sends the order confirmation to the customer.
+
+variables:
+  - { name: orderId, type: String, description: Order identifier. }
+  - { name: valid, type: Boolean, description: Whether the order is valid. }

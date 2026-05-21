@@ -1,0 +1,23 @@
+[
+  { "query": "у нас Spring Boot с camunda-bpm-spring-boot-starter, собери процесс согласования отпуска из наших делегатов (каталог приложу) и проставь historyTimeToLive, чтобы задеплоился", "should_trigger": true },
+  { "query": "order-process.bpmn не деплоится в камунду 7, кидает 'historyTimeToLive cannot be null' и ещё что-то про service task без реализации — помоги починить", "should_trigger": true },
+  { "query": "wire up the service tasks in onboarding.bpmn to our external task topics and assign the approval task to the managers group — we're on camunda 7", "should_trigger": true },
+  { "query": "сделай процесс выдачи кредита исполняемым в Camunda 7: делегаты и формы у нас есть в каталоге, нужно собрать .bpmn, привязать DMN через decisionRef и расставить async-границы", "should_trigger": true },
+  { "query": "add a non-interrupting boundary timer escalation (2 days) to invoice.bpmn on camunda platform 7, and don't break the existing delegateExpression wiring on Charge customer", "should_trigger": true },
+  { "query": "у нас CIB seven, к user task 'Проверка' нужно прикрутить camunda form из каталога и назначить на группу finance", "should_trigger": true },
+  { "query": "почему parallel gateway в моём процессе на camunda 7 заставляет всё после слияния выполняться дважды? вот claims.bpmn, посмотри слияние", "should_trigger": true },
+  { "query": "convert this approval workflow description into an executable Camunda 7 process: submit -> manager review -> if amount over 10k CFO signs off -> pay or send back. use our existing service activities where possible", "should_trigger": true },
+  { "query": "process падает на деплое — business rule task без decisionRef, и таймер стоит '5 minutes' вместо нормального формата. camunda 7, поправь и объясни", "should_trigger": true },
+  { "query": "собери из нашего каталога активити процесс обработки возврата товара и сохрани executable .bpmn для камунды; чего в каталоге нет — поставь заглушку и опиши в спеке", "should_trigger": true },
+
+  { "query": "переведи наш процесс на Camunda 8 / Zeebe: нужны zeebe:taskDefinition и FEEL-выражения, деплой в SaaS-кластер", "should_trigger": false },
+  { "query": "нарисуй простую BPMN-схему процесса найма для презентации руководству, движок не важен — просто понятная диаграмма со swimlanes", "should_trigger": false },
+  { "query": "draw a flowchart of our CI/CD pipeline stages for the README in mermaid", "should_trigger": false },
+  { "query": "напиши JavaDelegate-класс, который дёргает наш REST API инвентаризации и кладёт ответ в переменную процесса — сам класс, без изменения схемы", "should_trigger": false },
+  { "query": "review this Zeebe BPMN for our Camunda 8 deployment and check the FEEL input/output mappings on the job workers", "should_trigger": false },
+  { "query": "наше Spring Boot приложение медленно стартует, помоги оптимизировать пул соединений HikariCP в application.yaml", "should_trigger": false },
+  { "query": "подними локально движок Camunda 7: docker-compose с camunda-bpm-platform run distribution и Postgres, плюс админ-юзер", "should_trigger": false },
+  { "query": "наш external task worker на Node.js (camunda-external-task-client-js) падает с lock timeout под нагрузкой, помоги отладить воркер", "should_trigger": false },
+  { "query": "explain conceptually how a BPMN token flows through an inclusive gateway and when branches re-synchronize", "should_trigger": false },
+  { "query": "сделай отдельную DMN-таблицу скоринга в Camunda Modeler — просто decision table, без процесса и без BPMN", "should_trigger": false }
+]

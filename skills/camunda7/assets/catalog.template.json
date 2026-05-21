@@ -1,0 +1,62 @@
+{
+  "_comment": "Project catalog: the reusable inventory and declarations to assemble a Camunda 7 process from. This JSON is the CANONICAL form, but the skill also accepts the catalog inline in the prompt / as YAML / as a Markdown table and normalizes it to this shape (and can infer it from the repo when none is given). Reuse the exact names everywhere. Wire what exists; stub activities/forms/decisions that don't (+ spec). conventions = the project defaults the skill follows.",
+
+  "conventions": {
+    "serviceTaskStyle": "external",
+    "formType": "camundaForms",
+    "expressionLanguage": "juel",
+    "historyTimeToLive": "P30D",
+    "failedJobRetryTimeCycle": "R3/PT5M",
+    "asyncDefault": "asyncBefore on external/long tasks and before wait states",
+    "naming": "node ids PascalCase, external topics kebab-case, delegate beans camelCase"
+  },
+
+  "activities": [
+    {
+      "ref": "creditScoring",
+      "type": "delegate",
+      "name": "Compute credit score",
+      "inputs":  [{ "name": "applicantId", "type": "String" }],
+      "outputs": [{ "name": "creditScore", "type": "Integer" }],
+      "description": "Calls the credit bureau and returns a 0-1000 score."
+    }
+  ],
+
+  "forms": [
+    {
+      "ref": "loanReviewForm",
+      "name": "Loan review",
+      "fields": [
+        { "key": "approved", "label": "Approve?", "type": "checkbox" },
+        { "key": "comment", "label": "Comment", "type": "textarea" }
+      ],
+      "description": "Analyst decision form."
+    }
+  ],
+
+  "variables": [
+    { "name": "applicantId", "type": "String",  "description": "Applicant identifier." },
+    { "name": "creditScore", "type": "Integer", "description": "0-1000 bureau score." },
+    { "name": "approved",    "type": "Boolean", "description": "Human decision." }
+  ],
+
+  "messages":    [{ "name": "PaymentReceived", "description": "Bank confirms payment (correlate by this name)." }],
+  "signals":     [{ "name": "BatchClosed", "description": "Daily batch closed (broadcast)." }],
+  "errors":      [{ "errorCode": "PAYMENT_FAILED", "name": "Payment failed", "description": "Charge was declined." }],
+  "escalations": [{ "escalationCode": "SLA_BREACH", "name": "SLA breach" }],
+
+  "decisions": [
+    {
+      "ref": "riskDecision",
+      "name": "Risk decision",
+      "hitPolicy": "UNIQUE",
+      "inputs":  [{ "name": "amount", "type": "number" }],
+      "outputs": [{ "name": "risk", "type": "string" }],
+      "description": "DMN table mapping amount -> risk band."
+    }
+  ],
+
+  "roles": [
+    { "ref": "credit-analysts", "type": "group", "description": "Loan analysts who review applications." }
+  ]
+}

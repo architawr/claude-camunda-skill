@@ -1,0 +1,36 @@
+{
+  "_comment": "Project catalog for the invoice extensions. notify-customer + invoiceApprovalForm exist; there is NO manager-notification activity. The PAYMENT_FAILED error is declared here.",
+  "conventions": {
+    "serviceTaskStyle": "external",
+    "formType": "camundaForms",
+    "expressionLanguage": "juel",
+    "historyTimeToLive": "P180D",
+    "failedJobRetryTimeCycle": "R5/PT10M",
+    "asyncDefault": "asyncBefore on external tasks"
+  },
+  "activities": [
+    { "ref": "notify-customer", "type": "external", "name": "Notify customer",
+      "inputs": [{ "name": "invoiceId", "type": "String" }, { "name": "reason", "type": "String" }],
+      "outputs": [],
+      "description": "External worker that emails the customer." }
+  ],
+  "forms": [
+    { "ref": "invoiceApprovalForm", "name": "Invoice approval",
+      "fields": [
+        { "key": "approved", "label": "Approve invoice?", "type": "checkbox" },
+        { "key": "comment", "label": "Comment", "type": "textarea" }
+      ],
+      "description": "Form for the 'Approve invoice' user task." }
+  ],
+  "variables": [
+    { "name": "invoiceId", "type": "String",  "description": "Invoice id." },
+    { "name": "approved",  "type": "Boolean", "description": "Approval decision." },
+    { "name": "reason",    "type": "String",  "description": "Failure / notification reason." }
+  ],
+  "errors": [
+    { "errorCode": "PAYMENT_FAILED", "name": "Payment failed", "description": "Charge was declined by the provider." }
+  ],
+  "roles": [
+    { "ref": "finance", "type": "group", "description": "Finance team approvers." }
+  ]
+}

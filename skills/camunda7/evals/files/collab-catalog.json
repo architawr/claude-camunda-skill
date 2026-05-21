@@ -1,0 +1,26 @@
+{
+  "_comment": "Catalog for the customer/order-system collaboration. The system-side steps are existing delegates; the customer pool is a black-box participant.",
+  "conventions": {
+    "serviceTaskStyle": "delegate",
+    "expressionLanguage": "juel",
+    "historyTimeToLive": "P90D",
+    "failedJobRetryTimeCycle": "R5/PT10M"
+  },
+  "activities": [
+    { "ref": "processOrder", "type": "delegate", "name": "Process order",
+      "inputs": [{ "name": "orderId", "type": "String" }],
+      "outputs": [{ "name": "ok", "type": "Boolean" }],
+      "description": "Validates and books the order on the system side." },
+    { "ref": "sendConfirmation", "type": "delegate", "name": "Send confirmation",
+      "inputs": [{ "name": "orderId", "type": "String" }],
+      "outputs": [],
+      "description": "Notifies the customer the order is confirmed." }
+  ],
+  "messages": [
+    { "ref": "OrderPlaced", "description": "Customer -> system: a new order is placed." },
+    { "ref": "OrderConfirmed", "description": "System -> customer: the order is confirmed." }
+  ],
+  "variables": [
+    { "name": "orderId", "type": "String", "description": "Order identifier." }
+  ]
+}

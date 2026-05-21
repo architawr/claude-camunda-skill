@@ -1,0 +1,20 @@
+{
+  "_comment": "Catalog for the notify process. NOTE: it intentionally has NO SMS activity, no customerPhone variable, and no PaymentConfirmed message — those are supplied in the prompt and must be used from there.",
+  "conventions": {
+    "serviceTaskStyle": "delegate",
+    "formType": "camundaForms",
+    "expressionLanguage": "juel",
+    "historyTimeToLive": "P90D",
+    "failedJobRetryTimeCycle": "R5/PT10M"
+  },
+  "activities": [
+    { "ref": "validateOrder", "type": "delegate", "name": "Validate order",
+      "inputs": [{ "name": "orderId", "type": "String" }],
+      "outputs": [{ "name": "valid", "type": "Boolean" }],
+      "description": "Validates the order before notifying." }
+  ],
+  "variables": [
+    { "name": "orderId", "type": "String",  "description": "Order id." },
+    { "name": "valid",   "type": "Boolean", "description": "Whether the order is valid." }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "camunda7",
+  "description": "Build, fix, and review executable Camunda Platform 7 BPMN (.bpmn): wire service tasks to delegates/external-task topics/expressions, add user-task forms & assignment, DMN business rules, async & retries, listeners and historyTimeToLive; regenerate clean layout WITHOUT dropping camunda: extensions; and lint for engine execution problems (won't-deploy, deadlocks, missing topics/TTL, bad timers, Zeebe-by-mistake).",
+  "version": "1.2.0",
+  "author": {
+    "name": "Artur Karapetyan"
+  },
+  "license": "MIT",
+  "keywords": ["camunda", "camunda7", "camunda-bpm", "cibseven", "bpmn", "process", "workflow", "delegate", "external-task", "dmn", "executable"]
+}

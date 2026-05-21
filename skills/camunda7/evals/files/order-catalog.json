@@ -1,0 +1,26 @@
+{
+  "_comment": "Project catalog for fixing the order process. Wire the under-specified tasks to these existing activities; follow conventions.",
+  "conventions": {
+    "serviceTaskStyle": "delegate",
+    "expressionLanguage": "juel",
+    "historyTimeToLive": "P90D",
+    "failedJobRetryTimeCycle": "R5/PT10M",
+    "asyncDefault": "asyncBefore on tasks that call external systems"
+  },
+  "activities": [
+    { "ref": "reserveStock", "type": "delegate", "name": "Reserve stock",
+      "inputs": [{ "name": "orderId", "type": "String" }],
+      "outputs": [{ "name": "reserved", "type": "Boolean" }],
+      "description": "Reserves the ordered items in the warehouse." },
+    { "ref": "charge-card", "type": "external", "name": "Charge card",
+      "inputs": [{ "name": "orderId", "type": "String" }, { "name": "amount", "type": "Long" }],
+      "outputs": [{ "name": "chargeId", "type": "String" }],
+      "description": "External worker that charges the customer's card." }
+  ],
+  "variables": [
+    { "name": "orderId",  "type": "String",  "description": "Order id." },
+    { "name": "amount",   "type": "Long",    "description": "Order total." },
+    { "name": "reserved", "type": "Boolean", "description": "Whether stock was reserved." },
+    { "name": "chargeId", "type": "String",  "description": "Id of the card charge." }
+  ]
+}
