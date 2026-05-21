@@ -1,6 +1,8 @@
 node_modules/
 skills/*/node_modules/
-skills/camunda7-workspace/
 dist/
+dev/iteration-*/
+dev/skill-snapshot-*/
+dev/desc-opt/
 *.log
 .DS_Store

@@ -80,7 +80,8 @@ with a **Done / Needs you / Watch out** follow-up.
 - When changing behaviour, update the model-facing docs too: `SKILL.md`
   (workflow/limits) and `references/*.md` (XML recipes). These are instructions to
   the model, not just humans.
-- `skills/camunda7-workspace/` holds eval iterations, the audit report, and the
-  grader — **not** part of the shipped plugin.
+- The eval suite (definitions + fixtures) lives in top-level `evals/`; `dev/`
+  holds eval-run iterations, the audit report, and the grader — **none** of it is
+  part of the shipped skill (`skills/camunda7/`).
 - Don't drop `camunda:` extensions; don't hand-write DI; don't collapse-delete
   sub-process planes; don't emit `zeebe:` (that's Camunda 8).

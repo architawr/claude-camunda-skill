@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { parseBpmn, validateModel, lintModel, layoutModel } from '../scripts/lib.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const evalDir = join(root, 'evals', 'files');
+const evalDir = join(root, '..', '..', 'evals', 'files');
 const assetDir = join(root, 'assets');
 const bpmnIn = (d) => readdirSync(d).filter((f) => f.endsWith('.bpmn')).map((f) => join(d, f));
 const files = [...bpmnIn(evalDir), ...bpmnIn(assetDir)];
